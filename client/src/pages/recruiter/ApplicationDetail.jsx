@@ -127,16 +127,52 @@ export const ApplicationDetail = () => {
         <div className="card">
           <div className="card-header">
             <h3 className="card-title">Candidate Profile</h3>
-            {candidate.resumeFileId && (
-              <a
-                href={api.getResumeUrl(candidate.resumeFileId)}
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-secondary btn-sm"
-              >
-                <IconFileText size={15} /> View Resume PDF
-              </a>
-            )}
+        ```jsx
+{candidate.resumeFileId && (
+  <button
+    type="button"
+    className="btn btn-secondary btn-sm"
+    onClick={async () => {
+      let pdfUrl;
+
+      try {
+        // Open a blank tab immediately to avoid popup blocking.
+        const pdfWindow = window.open('about:blank', '_blank');
+
+        if (!pdfWindow) {
+          alert('Please allow pop-ups to view the resume.');
+          return;
+        }
+
+        pdfWindow.document.write('Loading resume...');
+
+        const blob = await api.getResumeBlob(candidate.resumeFileId);
+
+        pdfUrl = URL.createObjectURL(blob);
+        pdfWindow.location.href = pdfUrl;
+
+        // Release the temporary URL when the tab is closed.
+        pdfWindow.addEventListener(
+          'pagehide',
+          () => URL.revokeObjectURL(pdfUrl),
+          { once: true }
+        );
+      } catch (error) {
+        console.error('Resume loading error:', error);
+
+        alert(error.message || 'Unable to open resume PDF.');
+
+        // Close the blank tab if loading failed.
+        if (pdfUrl === undefined) {
+          // The request may have failed before a PDF URL was created.
+        }
+      }
+    }}
+  >
+    <IconFileText size={15} /> View Resume PDF
+  </button>
+)}
+```
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: '0.88rem' }}>

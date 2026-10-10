@@ -183,15 +183,39 @@ export const CandidateProfile = () => {
         <div className="card-header">
           <h3 className="card-title">Resume Document (PDF)</h3>
           {profile.resumeFileId && (
-            <a
-              href={api.getResumeUrl(profile.resumeFileId)}
-              target="_blank"
-              rel="noreferrer"
-              className="btn btn-outline btn-sm"
-            >
-              <IconFileText size={15} /> View Uploaded Resume PDF
-            </a>
-          )}
+      
+  <button
+    type="button"
+    className="btn btn-secondary btn-sm"
+    onClick={async () => {
+      const pdfWindow = window.open('about:blank', '_blank');
+
+      if (!pdfWindow) {
+        alert('Please allow pop-ups to view your resume.');
+        return;
+      }
+
+      try {
+        pdfWindow.document.write('Loading resume...');
+
+        const blob = await api.getResumeBlob(profile.resumeFileId);
+        const pdfUrl = URL.createObjectURL(blob);
+
+        pdfWindow.location.href = pdfUrl;
+
+        // Release the temporary URL after the PDF has had time to load.
+        setTimeout(() => URL.revokeObjectURL(pdfUrl), 60000);
+      } catch (error) {
+        console.error('Resume loading error:', error);
+        pdfWindow.close();
+        alert(error.message || 'Unable to open resume PDF.');
+      }
+    }}
+  >
+    View Uploaded Resume PDF
+  </button>
+)}
+          
         </div>
 
         <p style={{ fontSize: '0.86rem', color: 'var(--slate-600)', marginBottom: 16 }}>

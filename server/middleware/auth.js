@@ -12,7 +12,7 @@ const protect = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
       const decoded = jwt.verify(
         token,
-        process.env.JWT_SECRET || 'fallback_local_secret_2026'
+        process.env.JWT_SECRET || 'super_secret_local_jwt_key_smart_interview_management_2026_xyz'
       );
 
       const user = await User.findById(decoded.id);

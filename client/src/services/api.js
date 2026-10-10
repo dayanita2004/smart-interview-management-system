@@ -52,6 +52,22 @@ const request = async (endpoint, options = {}) => {
   }
 };
 
+const getResumeBlob = async (fileId) => {
+  const token = localStorage.getItem('sims_token');
+
+  const response = await fetch(`${API_BASE}/resume/${fileId}`, {
+    headers: token
+      ? { Authorization: `Bearer ${token}` }
+      : {},
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.message || 'Failed to load resume PDF');
+  }
+
+  return response.blob();
+};
 export const api = {
   // Auth
   login: (credentials) => request('/auth/login', { method: 'POST', body: JSON.stringify(credentials) }),
@@ -81,8 +97,10 @@ export const api = {
     request(`/applications/${id}/status`, { method: 'PUT', body: JSON.stringify(statusData) }),
 
   // Resume
-  uploadResume: (formData) => request('/resume/upload', { method: 'POST', body: formData }),
-  getResumeUrl: (fileId) => `${API_BASE}/resume/${fileId}`,
+ // Resume
+uploadResume: (formData) => request('/resume/upload', { method: 'POST', body: formData }),
+getResumeUrl: (fileId) => `${API_BASE}/resume/${fileId}`,
+getResumeBlob: (fileId) => getResumeBlob(fileId),
 
   // Screening
   runScreening: (applicationId) => request(`/screening/${applicationId}`, { method: 'POST' }),
