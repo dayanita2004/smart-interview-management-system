@@ -76,15 +76,21 @@ export const InterviewerInterviews = () => {
                           {item.candidateId?.email} • {item.candidateId?.experience || 0} yrs exp
                         </div>
                         {item.candidateId?.resumeFileId && (
-                          <a
-                            href={api.getResumeUrl(item.candidateId.resumeFileId)}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="btn btn-outline btn-sm"
-                            style={{ marginTop: 6, fontSize: '0.72rem', padding: '3px 8px' }}
-                          >
-                            <IconFileText size={13} /> View Resume PDF
-                          </a>
+                          <button
+  type="button"
+  onClick={async () => {
+    try {
+      const blob = await api.getResumeBlob(candidate.resumeFileId);
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (error) {
+      console.error("Failed to open resume:", error);
+      alert("Unable to open resume PDF. Please try again.");
+    }
+  }}
+>
+  View Resume PDF
+</button>
                         )}
                       </td>
                       <td>
